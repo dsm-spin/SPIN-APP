@@ -14,32 +14,38 @@ class CustomListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: const Color(0xFF42542A),
-        radius: 18,
-        child: Text(
-            icontext,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F9F4),
+        borderRadius: BorderRadius.circular(16),
       ),
-      title: Row(
-        children: [
-          Text(
-              text,
-              style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          SizedBox(width: 8),
-          Text(
-            smalltext,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFF42542A),
+          radius: 18,
+          child: Text(
+            icontext,
             style: TextStyle(
-              color: Colors.grey.withAlpha(128),
+              color: Colors.white,
+              fontSize: 14,
             ),
           ),
-        ],
+        ),
+        title: Row(
+          children: [
+            Text(
+              text,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(width: 8),
+            Text(
+              smalltext,
+              style: TextStyle(
+                color: Colors.grey.withAlpha(128),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
