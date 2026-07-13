@@ -15,28 +15,22 @@ class SelectButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 177.0),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isOn ? AppColors.button : Color(0xFFF1F3EA),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: AppColors.button, width: 1.5),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: isOn ? AppColors.background : Colors.black,
-              ),
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isOn ? AppColors.button : Color(0xFFF1F3EA),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: AppColors.button, width: 1.5),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: isOn ? AppColors.background : Colors.black,
           ),
         ),
       ),
