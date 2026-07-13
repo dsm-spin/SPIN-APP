@@ -16,7 +16,7 @@ class Splash extends StatelessWidget {
         children: [
           const SizedBox(height: 320),
           SvgPicture.asset(
-            'lib/assets/images/logo.svg',
+            'assets/images/logo.svg',
             width: 120,
             height: 120,
           ),
