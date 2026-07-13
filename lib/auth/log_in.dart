@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:spin_app/auth/InputWidget.dart';
 import 'package:spin_app/components/bottom_button.dart';
+import 'package:spin_app/log_in_test.dart';
+
 class LogInWidget extends StatefulWidget {
   const LogInWidget({super.key});
 
@@ -9,6 +11,9 @@ class LogInWidget extends StatefulWidget {
 }
 
 class _LogInWidgetState extends State<LogInWidget> {
+  TextEditingController _idcontroller = TextEditingController();
+  TextEditingController _passwordcontroller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,14 +41,28 @@ class _LogInWidgetState extends State<LogInWidget> {
             ),
             Text(
               '아이디와 비밀번호를 입력해주세요',
-              style: TextStyle(
-                color: Colors.black.withAlpha(128),
-              ),
+              style: TextStyle(color: Colors.black.withAlpha(128)),
             ),
             const SizedBox(height: 30),
-            InputWidget(),
+            InputWidget(
+              idController: _idcontroller,
+              passwordController: _passwordcontroller,
+            ),
             const SizedBox(height: 370),
-            BottomButton(text: '로그인', onTap: () {}),
+            BottomButton(
+              text: '로그인',
+              onTap: () async{
+                print('로그인 시도... ID: ${_idcontroller.text}');
+                
+                final result = await loginapi(_idcontroller.text, _passwordcontroller.text);
+
+                if(result != null) {
+                  print('로그인 최종 성공!');
+                } else {
+                  print('로그인 최종 실패');
+                }
+              },
+            ),
           ],
         ),
       ),

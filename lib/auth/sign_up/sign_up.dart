@@ -40,7 +40,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               ),
             ),
             const SizedBox(height: 30),
-            InputWidget(),
+            InputWidget(idController: , passwordController: ,),
             const SizedBox(height: 370),
             BottomButton(text: '로그인', onTap: () {})
           ],
