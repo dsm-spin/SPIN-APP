@@ -45,7 +45,7 @@ class Splash extends StatelessWidget {
               const SizedBox(height: 10),
               BottomButton(
                   text: '로그인',
-                  onTap: onLogin
+                  onTap: onLogin,
               )
             ],
           ),
