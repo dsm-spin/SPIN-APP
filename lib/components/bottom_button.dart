@@ -8,7 +8,7 @@ class BottomButton extends StatelessWidget {
   const BottomButton({
     super.key,
     required this.text,
-    required this.onTap
+    required this.onTap,
   });
 
   @override

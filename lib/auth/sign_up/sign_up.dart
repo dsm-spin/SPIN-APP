@@ -40,9 +40,9 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               ),
             ),
             const SizedBox(height: 30),
-            InputWidget(idController: , passwordController: ,),
+            InputWidget(idController: TextEditingController(), passwordController: TextEditingController()),
             const SizedBox(height: 370),
-            BottomButton(text: '로그인', onTap: () {})
+            BottomButton(onTap: () {}, text: '로그인',),
           ],
         ),
       ),
