@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spin_app/auth/sign_up/sign_up.dart';
+import 'package:spin_app/auth/log_in.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
       ),
       debugShowCheckedModeBanner: false,
-      home: const SignUpWidget(),
+      home: const LogInWidget(),
     );
   }
 }
