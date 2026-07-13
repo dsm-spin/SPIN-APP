@@ -17,27 +17,54 @@ class BottomButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: AppColors.button,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: TextButton(
-            onPressed: onTap,
-            child: Text(
-              textAlign: TextAlign.center,
-              text,
-              style: TextStyle(
-                color: AppColors.background,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '로그인을 아직 안하셨나요?',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    '로그인',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.button,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: TextButton(
+                onPressed: onTap,
+                child: Text(
+                  textAlign: TextAlign.center,
+                  text,
+                  style: TextStyle(
+                    color: AppColors.background,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
               ),
             ),
-
-          ),
+          ],
         ),
       ),
     );

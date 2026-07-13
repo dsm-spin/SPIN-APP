@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:spin_app/auth/InputWidget.dart';
 import 'package:spin_app/components/bottom_button.dart';
 
@@ -18,13 +19,10 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'spin',
-              style: TextStyle(
-                color: Color(0xFF3D532B),
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
+            SvgPicture.asset(
+              'lib/assets/images/logo.svg',
+              width: 20,
+              height: 20,
             ),
             const SizedBox(height: 100),
             Text(
