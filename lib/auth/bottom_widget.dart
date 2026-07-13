@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spin_app/log_in.dart';
+import 'package:spin_app/auth/log_in.dart';
 
 class BottomWidget extends StatefulWidget {
   const BottomWidget({super.key});

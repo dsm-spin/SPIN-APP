@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:spin_app/auth/sign_up/sign_up.dart';
-
 void main() {
   runApp(const MyApp());
 }
