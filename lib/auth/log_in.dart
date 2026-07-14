@@ -49,6 +49,29 @@ class _LogInWidgetState extends State<LogInWidget> {
               passwordController: _passwordcontroller,
             ),
             const SizedBox(height: 370),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '회원가입을 아직 안하셨나요?',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 20),
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    '회원가입',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             BottomButton(
               text: '로그인',
               onTap: () async{

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:spin_app/auth/log_in.dart';
 import 'package:spin_app/components/bottom_button.dart';
 import 'package:spin_app/theme/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -36,16 +38,16 @@ class Splash extends StatelessWidget {
                   TextButton(
                     onPressed: onSignIn,
                     child: Text(
-                    '회원가입',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                      '회원가입',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
               BottomButton(
-                  text: '로그인',
-                  onTap: onLogin,
+                text: '로그인',
+                onTap: () => onLogin(context),
               )
             ],
           ),
@@ -56,5 +58,20 @@ class Splash extends StatelessWidget {
 
   void onSignIn() {}
 
-  void onLogin() {}
+  void onLogin(BuildContext context) {
+    context.go('/login');
+  }
 }
+
+final router = GoRouter(
+  routes: [
+    GoRoute(
+        path: '/',
+        builder: (context, state) => Splash()
+    ),
+    GoRoute(
+        path: '/login',
+      builder: (context, state) => LogInWidget()
+    )
+  ],
+);

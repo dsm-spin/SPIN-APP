@@ -19,29 +19,6 @@ class BottomButton extends StatelessWidget {
         onTap: onTap,
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '로그인을 아직 안하셨나요?',
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(width: 20),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    '로그인',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                    ),
-                  ),
-                )
-              ],
-            ),
             Container(
               padding: EdgeInsets.symmetric(vertical: 8),
               width: double.infinity,
