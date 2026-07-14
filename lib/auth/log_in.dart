@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spin_app/auth/InputWidget.dart';
 import 'package:spin_app/components/bottom_button.dart';
 import 'package:spin_app/log_in_test.dart';
-
+import 'package:go_router/go_router.dart';
 class LogInWidget extends StatefulWidget {
   const LogInWidget({super.key});
 
@@ -60,7 +60,9 @@ class _LogInWidgetState extends State<LogInWidget> {
                 ),
                 const SizedBox(width: 20),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.go('/signup');
+                  },
                   child: Text(
                     '회원가입',
                     style: TextStyle(

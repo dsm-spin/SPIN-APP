@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:spin_app/auth/InputWidget.dart';
 import 'package:spin_app/components/bottom_button.dart';
 
@@ -42,6 +43,9 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 color: Colors.black.withAlpha(128),
               ),
             ),
+            const SizedBox(height: 30),
+            InputWidget(idController: _idcontroller, passwordController: _passwordcontroller),
+            const SizedBox(height: 370),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -53,7 +57,9 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 ),
                 const SizedBox(width: 20),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.go('/login');
+                  },
                   child: Text(
                     '로그인',
                     style: TextStyle(
@@ -65,10 +71,10 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 ),
               ],
             ),
-            const SizedBox(height: 30),
-            InputWidget(idController: _idcontroller, passwordController: _passwordcontroller),
-            const SizedBox(height: 370),
-            BottomButton(onTap: () {}, text: '회원가입',),
+            BottomButton(
+                onTap: () {},
+                text: '회원가입',
+            ),
           ],
         ),
       ),
