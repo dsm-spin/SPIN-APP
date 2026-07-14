@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:spin_app/auth/log_in.dart';
+import 'package:spin_app/router/router.dart';
 import 'package:spin_app/splash/splash.dart';
 void main() {
   runApp(const MyApp());
