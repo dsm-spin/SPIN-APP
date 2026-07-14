@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:spin_app/components/bottom_button.dart';
 import 'package:spin_app/theme/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
-class Splash extends StatelessWidget {
+class Splash extends StatefulWidget {
   const Splash({super.key});
 
+  @override
+  State<Splash> createState() => _SplashState();
+}
+
+class _SplashState extends State<Splash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +60,11 @@ class Splash extends StatelessWidget {
     );
   }
 
-  void onSignIn() {}
+  void onSignIn() {
+    context.go('/signup');
+  }
 
-  void onLogin() {}
+  void onLogin() {
+    context.go('/login');
+  }
 }

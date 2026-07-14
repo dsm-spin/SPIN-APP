@@ -11,6 +11,9 @@ class SignUpWidget extends StatefulWidget {
 }
 
 class _SignUpWidgetState extends State<SignUpWidget> {
+  final TextEditingController _idcontroller = TextEditingController();
+  final TextEditingController _passwordcontroller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,9 +43,9 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               ),
             ),
             const SizedBox(height: 30),
-            InputWidget(idController: TextEditingController(), passwordController: TextEditingController()),
+            InputWidget(idController: _idcontroller, passwordController: _passwordcontroller),
             const SizedBox(height: 370),
-            BottomButton(onTap: () {}, text: '로그인',),
+            BottomButton(onTap: () {}, text: '회원가입',),
           ],
         ),
       ),
