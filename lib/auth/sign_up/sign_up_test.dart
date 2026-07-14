@@ -6,7 +6,7 @@ final dio = Dio();
 Future<Loginmodel?> signupapi(String id, String password) async {
   try {
     final response = await dio.post(
-      '',
+      'http://52.78.224.116:8080/',
       data: {
         'username': id,
         'password': password
