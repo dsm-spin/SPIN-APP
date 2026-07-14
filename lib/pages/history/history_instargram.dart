@@ -52,10 +52,14 @@ class _HistoryInstargramState extends State<HistoryInstargram> {
       final file = File('${dir.path}/route_story.png');
       await file.writeAsBytes(byteData.buffer.asUint8List());
 
+      // TODO(diagnostic): 링크 스티커가 안 붙는 문제 확인 후 제거
+      debugPrint('[spin_share] routeId=${widget.history.routeId} shareUrl=${widget.history.shareUrl}');
+
       final handledNatively = await InstagramShareService.shareToStory(
         file.path,
         contentUrl: widget.history.shareUrl,
       );
+      debugPrint('[spin_share] handledNatively=$handledNatively');
       if (handledNatively) return;
 
       await SharePlus.instance.share(
