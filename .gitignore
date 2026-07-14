@@ -61,3 +61,8 @@ android/key.properties
 # Firebase 등 서비스 설정 파일 - 커밋 금지
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+
+# API 키 (Google Maps 등) - 커밋 금지
+# ios/Flutter/Secrets.xcconfig.example(템플릿)만 커밋하고 실제 값이 든 파일은 제외
+# (android/local.properties는 android/.gitignore에서 이미 제외됨)
+ios/Flutter/Secrets.xcconfig

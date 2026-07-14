@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:spin_app/core/theme/colors.dart';
 
@@ -12,6 +13,7 @@ class SelectButton extends StatelessWidget {
     required this.onTap,
     required this.isOn,
   });
+
 
   @override
   Widget build(BuildContext context) {

@@ -4,6 +4,7 @@ import 'package:spin_app/core/config/env.dart';
 import 'package:spin_app/core/services/deep_link_service.dart';
 import 'package:spin_app/core/storage/point_store.dart';
 import 'package:spin_app/pages/splash/auth_gate.dart';
+import 'package:spin_app/pages/splash/splash.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,9 +41,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: 'spin',
-      theme: ThemeData(primarySwatch: Colors.orange),
+      theme: ThemeData(primarySwatch: Colors.orange,scaffoldBackgroundColor: Colors.white),
       debugShowCheckedModeBanner: false,
-      home: const AuthGate(),
+      home: const Splash(),
     );
   }
 }

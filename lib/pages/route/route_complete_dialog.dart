@@ -12,11 +12,15 @@ Future<bool> showRouteCompleteDialog(
   BuildContext context, {
   required HistoryModel history,
   required List<StoreModel> stores,
+  bool hasRealLocation = false,
 }) async {
   final wantsShare = await showDialog<bool>(
     context: context,
-    builder: (context) =>
-        _RouteCompleteDialog(history: history, stores: stores),
+    builder: (context) => _RouteCompleteDialog(
+      history: history,
+      stores: stores,
+      hasRealLocation: hasRealLocation,
+    ),
   );
   return wantsShare ?? false;
 }
@@ -24,8 +28,13 @@ Future<bool> showRouteCompleteDialog(
 class _RouteCompleteDialog extends StatelessWidget {
   final HistoryModel history;
   final List<StoreModel> stores;
+  final bool hasRealLocation;
 
-  const _RouteCompleteDialog({required this.history, required this.stores});
+  const _RouteCompleteDialog({
+    required this.history,
+    required this.stores,
+    required this.hasRealLocation,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +92,11 @@ class _RouteCompleteDialog extends StatelessWidget {
                     aspectRatio:
                         RouteStoryCard.storySize.width /
                         RouteStoryCard.storySize.height,
-                    child: RouteStoryCard(history: history, stores: stores),
+                    child: RouteStoryCard(
+                      history: history,
+                      stores: stores,
+                      hasRealLocation: hasRealLocation,
+                    ),
                   ),
                 ),
               ),

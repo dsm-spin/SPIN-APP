@@ -21,6 +21,13 @@ class PointEntry {
 
   final PointEntryType type;
 
+  /// 혜택 교환(사용) 내역에만 있는 교환 코드. 가게 직원에게 보여주는 코드로,
+  /// [CouponsPage]에서 다시 조회할 수 있도록 저장해둔다.
+  final String? code;
+
+  /// 교환 코드를 실제로 가게에서 사용 처리했는지 여부. 적립 내역에는 의미 없다.
+  final bool used;
+
   const PointEntry({
     required this.storeName,
     required this.points,
@@ -28,6 +35,8 @@ class PointEntry {
     required this.earnedAt,
     required this.challengeId,
     this.type = PointEntryType.earn,
+    this.code,
+    this.used = false,
   });
 
   factory PointEntry.fromJson(Map<String, dynamic> json) {
@@ -43,6 +52,8 @@ class PointEntry {
       type: (json['type'] as String?) == 'spend'
           ? PointEntryType.spend
           : PointEntryType.earn,
+      code: json['code'] as String?,
+      used: (json['used'] as bool?) ?? false,
     );
   }
 
@@ -54,7 +65,22 @@ class PointEntry {
       'earnedAt': earnedAt.toIso8601String(),
       'challengeId': challengeId,
       'type': type == PointEntryType.spend ? 'spend' : 'earn',
+      'code': code,
+      'used': used,
     };
+  }
+
+  PointEntry copyWith({bool? used}) {
+    return PointEntry(
+      storeName: storeName,
+      points: points,
+      balanceAfter: balanceAfter,
+      earnedAt: earnedAt,
+      challengeId: challengeId,
+      type: type,
+      code: code,
+      used: used ?? this.used,
+    );
   }
 
   /// earnedAt을 '2026.07.14 (화) 15:04' 형태로 변환

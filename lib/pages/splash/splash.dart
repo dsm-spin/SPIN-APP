@@ -59,6 +59,7 @@ class Splash extends StatelessWidget {
                       (route) => false,
                     ),
                   ),
+                  const SizedBox(height: 10,),
                 ],
               ),
             ],

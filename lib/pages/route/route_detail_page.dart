@@ -253,10 +253,10 @@ class _StatsCard extends StatelessWidget {
   String get _durationUnit {
     final hours = result.estimatedDurationMinutes ~/ 60;
     final minutes = result.estimatedDurationMinutes % 60;
-    if (hours <= 0) return 'm';
-    if (minutes <= 0) return 'h';
-    return 'h $minutes'
-        'm';
+    if (hours <= 0) return '분';
+    if (minutes <= 0) return '시간';
+    return '시간 $minutes'
+        '분';
   }
 
   @override

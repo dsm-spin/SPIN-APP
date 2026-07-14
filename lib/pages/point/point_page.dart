@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spin_app/core/storage/point_store.dart';
 import 'package:spin_app/core/theme/colors.dart';
 import 'package:spin_app/models/point_model.dart';
+import 'package:spin_app/pages/point/coupons_page.dart';
 import 'package:spin_app/pages/point/rewards_page.dart';
 
 /// '포인트' 탭: 현재 잔액과 체크인으로 쌓인 적립 내역을 보여준다.
@@ -35,6 +36,15 @@ class _PointPageState extends State<PointPage> {
       ),
     );
     // 혜택 교환으로 잔액/내역이 바뀌었을 수 있으니 다시 불러온다.
+    if (!mounted) return;
+    await _refresh();
+  }
+
+  Future<void> _openCoupons() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const CouponsPage()));
+    // 쿠폰 사용 처리로 내역이 바뀌었을 수 있으니 다시 불러온다.
     if (!mounted) return;
     await _refresh();
   }
@@ -74,6 +84,11 @@ class _PointPageState extends State<PointPage> {
                   _BalanceCard(ledger: ledger),
                   const SizedBox(height: 14),
                   _RedeemButton(onTap: () => _openRewards(ledger.balance)),
+                  const SizedBox(height: 10),
+                  _CouponsButton(
+                    unusedCount: ledger.unusedCouponCount,
+                    onTap: _openCoupons,
+                  ),
                   const SizedBox(height: 28),
                   const Text(
                     '포인트 내역',
@@ -226,6 +241,71 @@ class _RedeemButton extends StatelessWidget {
                 color: AppColors.background,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "포인트로 혜택 받기" 버튼 아래의 "내 쿠폰함" 버튼. 아직 사용하지 않은
+/// 쿠폰이 있으면 개수 배지를 보여준다.
+class _CouponsButton extends StatelessWidget {
+  final int unusedCount;
+  final VoidCallback onTap;
+
+  const _CouponsButton({required this.unusedCount, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.button.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.confirmation_number_outlined,
+              size: 18,
+              color: AppColors.button,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              '내 쿠폰함',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppColors.button,
+              ),
+            ),
+            if (unusedCount > 0) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.button,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  '$unusedCount',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.background,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

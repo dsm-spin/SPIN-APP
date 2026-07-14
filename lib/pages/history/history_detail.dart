@@ -1,28 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:spin_app/api/route_api.dart';
 import 'package:spin_app/core/components/route_map_painter.dart';
 import 'package:spin_app/core/components/summary_stat.dart';
 import 'package:spin_app/core/theme/colors.dart';
+import 'package:spin_app/models/route_model.dart';
 import 'package:spin_app/pages/history/history_instargram.dart';
+import 'package:spin_app/pages/route/route_map_page.dart';
 import 'package:spin_app/models/history_model.dart';
 import 'package:spin_app/models/store_model.dart';
 
-class HistoryDetail extends StatelessWidget {
+class HistoryDetail extends StatefulWidget {
   final HistoryModel history;
   final List<StoreModel> stores;
 
   const HistoryDetail({super.key, required this.history, required this.stores});
 
+  @override
+  State<HistoryDetail> createState() => _HistoryDetailState();
+}
+
+class _HistoryDetailState extends State<HistoryDetail> {
+  late List<StoreModel> _stores = widget.stores;
+  List<RouteStopModel>? _liveStops;
+
+  bool get _hasRealLocation => _liveStops != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRealStores();
+  }
+
+  /// 히스토리 목록 API는 가게 좌표를 안 내려줘서, 처음엔 순번만 임의 배치한
+  /// 좌표로 그린다. routeId가 있으면 루트 상세(GET /routes/{routeId})를 다시
+  /// 불러와 실좌표로 바꿔치기해 진짜 지도 위 경로를 보여준다.
+  Future<void> _loadRealStores() async {
+    final routeId = widget.history.routeId;
+    if (routeId == null) return;
+
+    final result = await getRouteDetail(routeId);
+    if (!mounted || result == null) return;
+
+    final stops = result.stops;
+    final hasAllCoords =
+        stops.isNotEmpty &&
+        stops.every((s) => s.latitude != null && s.longitude != null);
+    if (!hasAllCoords) return;
+
+    setState(() {
+      _liveStops = stops;
+      _stores = [
+        for (final s in stops)
+          StoreModel(
+            name: s.storeName,
+            address: s.address,
+            latitude: s.latitude!,
+            longitude: s.longitude!,
+          ),
+      ];
+    });
+  }
+
   void _openInstagramShare(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) =>
-            HistoryInstargram(history: history, stores: stores),
+        builder: (context) => HistoryInstargram(
+          history: widget.history,
+          stores: _stores,
+          hasRealLocation: _hasRealLocation,
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final history = widget.history;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -67,7 +121,11 @@ class HistoryDetail extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: _RouteSummaryCard(history: history, stores: stores),
+                child: _RouteSummaryCard(
+                  history: history,
+                  stores: _stores,
+                  liveStops: _liveStops,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(25, 14, 25, 20),
@@ -87,10 +145,10 @@ class HistoryDetail extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Column(
                   children: [
-                    for (var i = 0; i < stores.length; i++)
+                    for (var i = 0; i < _stores.length; i++)
                       _StoreTimelineTile(
-                        store: stores[i],
-                        isLast: i == stores.length - 1,
+                        store: _stores[i],
+                        isLast: i == _stores.length - 1,
                       ),
                   ],
                 ),
@@ -109,10 +167,19 @@ class _RouteSummaryCard extends StatelessWidget {
   final HistoryModel history;
   final List<StoreModel> stores;
 
-  const _RouteSummaryCard({required this.history, required this.stores});
+  /// 실좌표가 있을 때만 채워진다. 있으면 진짜 지도 위 경로를, 없으면 추상
+  /// 경로도를 보여준다.
+  final List<RouteStopModel>? liveStops;
+
+  const _RouteSummaryCard({
+    required this.history,
+    required this.stores,
+    required this.liveStops,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final stops = liveStops;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
@@ -123,10 +190,15 @@ class _RouteSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 230,
-            width: double.infinity,
-            child: CustomPaint(painter: RouteMapPainter(stores: stores)),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              height: 230,
+              width: double.infinity,
+              child: stops != null
+                  ? _LiveRouteMap(region: history.region, stops: stops)
+                  : CustomPaint(painter: RouteMapPainter(stores: stores)),
+            ),
           ),
           const SizedBox(height: 20),
           SummaryStat(label: '거리', value: history.distanceKmLabel, unit: 'km'),
@@ -135,6 +207,72 @@ class _RouteSummaryCard extends StatelessWidget {
           const SizedBox(height: 16),
           SummaryStat(label: '소요 시간', value: history.durationLabel),
         ],
+      ),
+    );
+  }
+}
+
+/// 실좌표가 있을 때 보여주는 실제 지도 위 경로 미리보기. 탭하면 전체 지도로 연다.
+class _LiveRouteMap extends StatefulWidget {
+  final String region;
+  final List<RouteStopModel> stops;
+
+  const _LiveRouteMap({required this.region, required this.stops});
+
+  @override
+  State<_LiveRouteMap> createState() => _LiveRouteMapState();
+}
+
+class _LiveRouteMapState extends State<_LiveRouteMap> {
+  Set<Marker> _markers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMarkers();
+  }
+
+  Future<void> _loadMarkers() async {
+    // 이미 완주한 루트라 전부 채워진 도장으로 표시한다.
+    final markers = await buildStopMarkers(
+      widget.stops,
+      checkedInCount: widget.stops.length,
+    );
+    if (!mounted) return;
+    setState(() => _markers = markers);
+  }
+
+  void _openFullMap() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RouteMapPage(
+          region: widget.region,
+          stops: widget.stops,
+          checkedInCount: widget.stops.length,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final points = routePoints(widget.stops);
+    return GestureDetector(
+      onTap: _openFullMap,
+      child: AbsorbPointer(
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: points.isNotEmpty
+                ? points.first
+                : (districtCenters[widget.region] ?? daejeonCenter),
+            zoom: 14.5,
+          ),
+          markers: _markers,
+          polylines: buildRoutePolyline(widget.stops),
+          zoomControlsEnabled: false,
+          myLocationButtonEnabled: false,
+          mapToolbarEnabled: false,
+        ),
       ),
     );
   }

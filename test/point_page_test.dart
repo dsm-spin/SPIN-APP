@@ -20,6 +20,55 @@ class _FakePointStore implements PointStore {
   Future<void> add(PointEntry entry) async {
     entries.add(entry);
   }
+
+  @override
+  Future<void> addTestPoint({
+    required int points,
+    required int challengeId,
+    String storeName = '테스트 가게',
+  }) async {
+    entries.add(
+      PointEntry(
+        storeName: storeName,
+        points: points,
+        balanceAfter:
+            (entries.isEmpty ? 0 : entries.first.balanceAfter) + points,
+        earnedAt: DateTime.now(),
+        challengeId: challengeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> spendTestPoint({
+    required int points,
+    required int challengeId,
+    String storeName = '테스트 사용',
+  }) async {
+    entries.add(
+      PointEntry(
+        storeName: storeName,
+        points: points,
+        balanceAfter: ((entries.isEmpty ? 0 : entries.first.balanceAfter) - points)
+            .clamp(0, 999999999),
+        earnedAt: DateTime.now(),
+        challengeId: challengeId,
+        type: PointEntryType.spend,
+      ),
+    );
+  }
+
+  @override
+  Future<void> markCouponUsed(String code) async {
+    final index = entries.indexWhere((e) => e.code == code);
+    if (index == -1) return;
+    entries[index] = entries[index].copyWith(used: true);
+  }
+
+  @override
+  Future<void> clear() async {
+    entries.clear();
+  }
 }
 
 void main() {

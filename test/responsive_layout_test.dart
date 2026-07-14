@@ -18,7 +18,13 @@ import 'package:spin_app/pages/home/home.dart';
 import 'package:spin_app/pages/point/point_page.dart';
 import 'package:spin_app/pages/point/redemption_success_page.dart';
 import 'package:spin_app/pages/point/rewards_page.dart';
+import 'package:spin_app/pages/route/checkin_reward_dialog.dart';
+import 'package:spin_app/pages/route/route_complete_dialog.dart';
+import 'package:spin_app/pages/route/checkin_reward_dialog.dart';
+import 'package:spin_app/pages/route/route_complete_dialog.dart';
 import 'package:spin_app/pages/route/route_detail_page.dart';
+import 'package:spin_app/pages/route/route_progress_page.dart';
+import 'package:spin_app/pages/route/route_progress_page.dart';
 
 /// 기기별 화면 크기(논리 픽셀). 가장 작은 기기(iPhone SE 1세대급)부터
 /// 가장 큰 기기(Pro Max급)까지 훑는다. 여기서 RenderFlex 오버플로가 나면
@@ -43,6 +49,55 @@ class _FakePointStore implements PointStore {
 
   @override
   Future<void> add(PointEntry entry) async => entries.add(entry);
+
+  @override
+  Future<void> addTestPoint({
+    required int points,
+    required int challengeId,
+    String storeName = '테스트 가게',
+  }) async {
+    entries.add(
+      PointEntry(
+        storeName: storeName,
+        points: points,
+        balanceAfter:
+            (entries.isEmpty ? 0 : entries.first.balanceAfter) + points,
+        earnedAt: DateTime.now(),
+        challengeId: challengeId,
+      ),
+    );
+  }
+
+  @override
+  Future<void> spendTestPoint({
+    required int points,
+    required int challengeId,
+    String storeName = '테스트 사용',
+  }) async {
+    entries.add(
+      PointEntry(
+        storeName: storeName,
+        points: points,
+        balanceAfter: ((entries.isEmpty ? 0 : entries.first.balanceAfter) - points)
+            .clamp(0, 999999999),
+        earnedAt: DateTime.now(),
+        challengeId: challengeId,
+        type: PointEntryType.spend,
+      ),
+    );
+  }
+
+  @override
+  Future<void> markCouponUsed(String code) async {
+    final index = entries.indexWhere((e) => e.code == code);
+    if (index == -1) return;
+    entries[index] = entries[index].copyWith(used: true);
+  }
+
+  @override
+  Future<void> clear() async {
+    entries.clear();
+  }
 }
 
 final _history = HistoryModel(
@@ -149,11 +204,48 @@ final _screens = <String, Widget Function()>{
   ),
   '히스토리 목록': () => const HistoryList(),
   '히스토리 상세': () => HistoryDetail(history: _history, stores: _stores),
-  '인스타 공유': () => HistoryInstargram(history: _history, stores: _stores),
+  '인스타 공유': () =>
+      HistoryInstargram(history: _history, stores: _stores, hasRealLocation: true),
   '루트 상세': () => const RouteDetailPage(
     result: _routeResult,
     region: '유성구',
     purpose: '친구랑 저녁 먹고 산책',
+  ),
+  '루트 진행': () => const RouteProgressPage(
+    result: _routeResult,
+    region: '유성구',
+    challenge: ChallengeModel(
+      challengeId: 1,
+      routeId: 2,
+      status: 'IN_PROGRESS',
+      totalStops: 3,
+      checkedInCount: 1,
+      startedAt: '',
+      completedAt: '',
+    ),
+  ),
+};
+
+/// 화면 위에 띄우는 다이얼로그들. 작은 기기에서 잘리기 가장 쉬운 곳이다.
+final _dialogs = <String, Future<void> Function(BuildContext)>{
+  '완주 축하': (context) => showRouteCompleteDialog(
+    context,
+    history: _history,
+    stores: _stores,
+    hasRealLocation: true,
+  ),
+  '체크인 보상': (context) => showCheckInRewardDialog(
+    context,
+    store: _routeResult.stops.first,
+    result: const CheckInResult(
+      challengeId: 1,
+      routeId: 2,
+      status: 'IN_PROGRESS',
+      totalStops: 3,
+      checkedInCount: 2,
+      pointsEarned: 20,
+      totalPoints: 1210,
+    ),
   ),
 };
 
@@ -203,6 +295,36 @@ void main() {
             await tester.drag(scrollable.first, const Offset(0, -400));
             await tester.pumpAndSettle();
           }
+        });
+      }
+
+      for (final dialog in _dialogs.entries) {
+        testWidgets('${dialog.key} 다이얼로그 — ${phone.key}, 글꼴 x$textScale', (
+          tester,
+        ) async {
+          tester.view.devicePixelRatio = 1.0;
+          tester.view.physicalSize = phone.value;
+          addTearDown(tester.view.reset);
+
+          await tester.pumpWidget(
+            MediaQuery(
+              data: MediaQueryData(
+                size: phone.value,
+                textScaler: TextScaler.linear(textScale),
+              ),
+              child: MaterialApp(
+                home: Builder(
+                  builder: (context) {
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => dialog.value(context),
+                    );
+                    return const Scaffold();
+                  },
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
         });
       }
     }

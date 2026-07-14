@@ -2,7 +2,12 @@
 // 실행: flutter run -t lib/main_preview.dart
 import 'package:flutter/material.dart';
 import 'package:spin_app/models/challenge_model.dart';
+import 'package:spin_app/models/history_model.dart';
 import 'package:spin_app/models/route_model.dart';
+import 'package:spin_app/models/store_model.dart';
+import 'package:spin_app/pages/history/history_detail.dart';
+import 'package:spin_app/pages/history/history_instargram.dart';
+import 'package:spin_app/pages/route/route_complete_dialog.dart';
 import 'package:spin_app/pages/route/route_detail_page.dart';
 import 'package:spin_app/pages/route/route_progress_page.dart';
 
@@ -69,6 +74,30 @@ const _challenge = ChallengeModel(
   completedAt: '',
 );
 
+// 실좌표 기반 지도/사진 배경 공유 카드를 미리 보기 위한 샘플 데이터.
+final _sampleStores = [
+  for (final s in _stops)
+    StoreModel(
+      name: s.storeName,
+      address: s.address,
+      latitude: s.latitude!,
+      longitude: s.longitude!,
+    ),
+];
+
+final _sampleHistory = HistoryModel(
+  challengeId: 1,
+  routeId: 1,
+  region: '유성구',
+  purpose: '친구랑 저녁 먹고 갑천 따라 산책하기',
+  totalDistanceMeters: 2400,
+  estimatedDurationMinutes: 80,
+  startedAt: DateTime(2026, 7, 14, 15),
+  completedAt: DateTime(2026, 7, 14, 17, 20),
+  photoUrl: '',
+  storeNames: [for (final s in _stops) s.storeName].join(', '),
+);
+
 class _PreviewApp extends StatelessWidget {
   const _PreviewApp();
 
@@ -106,6 +135,41 @@ class _PreviewApp extends StatelessWidget {
                     ),
                   ),
                   child: const Text('루트 진행 화면'),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => HistoryDetail(
+                        history: _sampleHistory,
+                        stores: _sampleStores,
+                      ),
+                    ),
+                  ),
+                  child: const Text('히스토리 상세 (실좌표)'),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => HistoryInstargram(
+                        history: _sampleHistory,
+                        stores: _sampleStores,
+                        hasRealLocation: true,
+                      ),
+                    ),
+                  ),
+                  child: const Text('인스타 공유 (실제 지도 + 사진 배경)'),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => showRouteCompleteDialog(
+                    context,
+                    history: _sampleHistory,
+                    stores: _sampleStores,
+                    hasRealLocation: true,
+                  ),
+                  child: const Text('완주 축하 다이얼로그 (실제 지도)'),
                 ),
               ],
             ),

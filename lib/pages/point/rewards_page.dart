@@ -34,6 +34,7 @@ class _RewardsPageState extends State<RewardsPage> {
     }
 
     final newBalance = _balance - reward.cost;
+    final code = generateRedemptionCode();
     await pointStore.add(
       PointEntry(
         storeName: reward.title,
@@ -42,6 +43,7 @@ class _RewardsPageState extends State<RewardsPage> {
         earnedAt: DateTime.now(),
         challengeId: 0,
         type: PointEntryType.spend,
+        code: code,
       ),
     );
     if (!mounted) return;
@@ -55,7 +57,7 @@ class _RewardsPageState extends State<RewardsPage> {
       MaterialPageRoute(
         builder: (_) => RedemptionSuccessPage(
           reward: reward,
-          code: generateRedemptionCode(),
+          code: code,
           remainingBalance: newBalance,
         ),
       ),

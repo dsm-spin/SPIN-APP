@@ -139,6 +139,9 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
   Future<void> _celebrateAndOfferShare() async {
     final history = _historyForShare();
     final stores = _storesForShare();
+    final hasRealLocation = widget.result.stops.every(
+      (stop) => stop.latitude != null && stop.longitude != null,
+    );
 
     // 스토리 카드에는 글이 안 실리니, 함께 올릴 캡션은 붙여넣을 수 있게 복사해둔다.
     final caption = buildRouteCaption(
@@ -154,6 +157,7 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
       context,
       history: history,
       stores: stores,
+      hasRealLocation: hasRealLocation,
     );
     if (!mounted || !wantsShare) return;
 
@@ -162,7 +166,11 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
 
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => HistoryInstargram(history: history, stores: stores),
+        builder: (_) => HistoryInstargram(
+          history: history,
+          stores: stores,
+          hasRealLocation: hasRealLocation,
+        ),
       ),
     );
   }
