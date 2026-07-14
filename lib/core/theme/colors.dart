@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  AppColors._();
 
   static const Color background = Color(0xFFFFFFFF);
   static const Color button = Color(0xFF495E30);
