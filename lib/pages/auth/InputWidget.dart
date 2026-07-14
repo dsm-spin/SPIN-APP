@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:spin_app/auth/InputWidget_component.dart';
+import 'package:spin_app/pages/auth/InputWidget_component.dart';
 
 class InputWidget extends StatefulWidget {
   final TextEditingController idController;

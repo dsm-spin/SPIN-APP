@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:spin_app/components/bottom_button.dart';
-import 'package:spin_app/theme/colors.dart';
+import 'package:spin_app/core/components/bottom_button.dart';
+import 'package:spin_app/core/theme/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Splash extends StatelessWidget {

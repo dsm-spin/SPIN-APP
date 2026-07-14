@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spin_app/theme/colors.dart';
+import 'package:spin_app/core/theme/colors.dart';
 
 class SelectButton extends StatelessWidget {
   bool isOn;
