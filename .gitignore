@@ -43,3 +43,21 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 환경 변수 (서버 주소 등) - 커밋 금지
+# .env.example(템플릿)만 커밋하고 실제 값이 든 파일은 전부 제외
+.env
+.env.*
+!.env.example
+
+# 서명 키 / 인증서 - 커밋 금지
+android/key.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.mobileprovision
+
+# Firebase 등 서비스 설정 파일 - 커밋 금지
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist

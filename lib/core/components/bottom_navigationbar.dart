@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spin_app/pages/history/history.dart';
 import 'package:spin_app/pages/home/home.dart';
-import 'package:spin_app/pages/route/route_page.dart';
-
+import 'package:spin_app/route/route.dart';
 
 class BottomNavigationbar extends StatefulWidget {
   final int initialIndex;

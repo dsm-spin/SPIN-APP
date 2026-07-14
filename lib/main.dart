@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:spin_app/auth/log_in.dart';
-void main() {
+import 'package:spin_app/core/components/bottom_navigationbar.dart';
+import 'package:spin_app/core/config/env.dart';
+import 'package:spin_app/pages/history/history.dart';
+import 'package:spin_app/pages/splash/splash.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Env.load();
   runApp(const MyApp());
 }
 
@@ -10,12 +16,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'spin',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-      ),
+      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: const LogInWidget(),
+      theme: ThemeData(
+        fontFamily: 'SUITVariable',
+        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: const History(),
     );
   }
 }
