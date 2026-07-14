@@ -1,5 +1,6 @@
 class HistoryModel {
   final int challengeId;
+  final int? routeId;
   final String region;
   final String purpose;
   final int totalDistanceMeters;
@@ -11,6 +12,7 @@ class HistoryModel {
 
   const HistoryModel({
     required this.challengeId,
+    this.routeId,
     required this.region,
     required this.purpose,
     required this.totalDistanceMeters,
@@ -24,20 +26,24 @@ class HistoryModel {
   factory HistoryModel.fromJson(Map<String, dynamic> json) {
     return HistoryModel(
       challengeId: json['challengeId'] as int,
+      routeId: (json['routeId'] as num?)?.toInt(),
       region: json['region'] as String,
       purpose: json['purpose'] as String,
       totalDistanceMeters: json['totalDistanceMeters'] as int,
       estimatedDurationMinutes: json['estimatedDurationMinutes'] as int,
       startedAt: DateTime.parse(json['startedAt'] as String),
       completedAt: DateTime.parse(json['completedAt'] as String),
-      photoUrl: json['photoUrl'] as String,
-      storeNames: json['storeNames'] as String,
+      // 미첨부 시 서버가 null을 내려준다
+      photoUrl: (json['photoUrl'] as String?) ?? '',
+      // 서버는 방문 순서대로의 가게 이름 "배열"을 내려준다
+      storeNames: ((json['storeNames'] as List?) ?? []).join(', '),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'challengeId': challengeId,
+      'routeId': routeId,
       'region': region,
       'purpose': purpose,
       'totalDistanceMeters': totalDistanceMeters,
@@ -47,6 +53,21 @@ class HistoryModel {
       'photoUrl': photoUrl,
       'storeNames': storeNames,
     };
+  }
+
+  /// 인스타그램 스토리에 링크 스티커로 붙일 공유 페이지 URL. routeId가 없으면 null.
+  String? get shareUrl => routeId == null
+      ? null
+      : 'https://dsm-spin.github.io/SPIN-BE/share/?routeId=$routeId';
+
+  /// 이 여행에서 뭘 하려고 했는지 — 히스토리의 제목으로 쓴다.
+  /// 목적을 안 적고 만든 루트는 지역만으로 제목을 세운다.
+  String get title {
+    final purpose = this.purpose.trim();
+    if (purpose.isNotEmpty) return purpose;
+
+    final region = this.region.trim();
+    return region.isEmpty ? '골목 루트' : '$region 골목 루트';
   }
 
   /// totalDistanceMeters를 '3.4' (km) 형태로 변환

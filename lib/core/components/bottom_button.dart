@@ -5,35 +5,37 @@ class BottomButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const BottomButton({
-    super.key,
-    required this.text,
-    required this.onTap
-  });
+  const BottomButton({super.key, required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.button,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      alignment: Alignment.center,
-      child: TextButton(
-        onPressed: onTap,
-        child: Text(
-          textAlign: TextAlign.center,
-          text,
-          style: TextStyle(
-            color: AppColors.background,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 2),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.button,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: TextButton(
+              onPressed: onTap,
+              child: Text(
+                textAlign: TextAlign.center,
+                text,
+                style: TextStyle(
+                  color: AppColors.background,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
         ),
-
-      ),
+      ],
     );
   }
 }

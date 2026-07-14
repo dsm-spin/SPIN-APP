@@ -31,9 +31,11 @@ class RouteMapPainter extends CustomPainter {
       for (final s in stores)
         Offset(
           size.width * _padding +
-              (lngRange == 0 ? 0.5 : (s.longitude - minLng) / lngRange) * drawWidth,
+              (lngRange == 0 ? 0.5 : (s.longitude - minLng) / lngRange) *
+                  drawWidth,
           size.height * _padding +
-              (latRange == 0 ? 0.5 : (maxLat - s.latitude) / latRange) * drawHeight,
+              (latRange == 0 ? 0.5 : (maxLat - s.latitude) / latRange) *
+                  drawHeight,
         ),
     ];
   }
@@ -81,7 +83,10 @@ class RouteMapPainter extends CustomPainter {
 
     // 위쪽에 있는 노드는 라벨을 위로, 아래쪽 노드는 아래로
     final above = dot.dy < size.height / 2;
-    final dx = (dot.dx - painter.width / 2).clamp(0.0, size.width - painter.width);
+    final dx = (dot.dx - painter.width / 2).clamp(
+      0.0,
+      size.width - painter.width,
+    );
     final dy = above ? dot.dy - painter.height - 14 : dot.dy + 14;
     painter.paint(canvas, Offset(dx, dy));
   }
@@ -92,7 +97,9 @@ class RouteMapPainter extends CustomPainter {
     for (var i = 0; i < stores.length; i++) {
       final a = oldDelegate.stores[i];
       final b = stores[i];
-      if (a.name != b.name || a.latitude != b.latitude || a.longitude != b.longitude) {
+      if (a.name != b.name ||
+          a.latitude != b.latitude ||
+          a.longitude != b.longitude) {
         return true;
       }
     }

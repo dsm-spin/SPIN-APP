@@ -10,19 +10,13 @@ class HistoryDetail extends StatelessWidget {
   final HistoryModel history;
   final List<StoreModel> stores;
 
-  const HistoryDetail({
-    super.key,
-    required this.history,
-    required this.stores,
-  });
+  const HistoryDetail({super.key, required this.history, required this.stores});
 
   void _openInstagramShare(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => HistoryInstargram(
-          history: history,
-          stores: stores,
-        ),
+        builder: (context) =>
+            HistoryInstargram(history: history, stores: stores),
       ),
     );
   }
@@ -41,6 +35,34 @@ class HistoryDetail extends StatelessWidget {
                 child: IconButton(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.arrow_back_ios_new, size: 22),
+                ),
+              ),
+              // 무엇을 하러 간 여행이었는지를 제목으로 세운다.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(25, 6, 25, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      history.title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      [
+                        if (history.region.trim().isNotEmpty) history.region,
+                        history.completedAtLabel,
+                      ].join(' · '),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF6A6A6A),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Padding(
@@ -104,16 +126,10 @@ class _RouteSummaryCard extends StatelessWidget {
           SizedBox(
             height: 230,
             width: double.infinity,
-            child: CustomPaint(
-              painter: RouteMapPainter(stores: stores),
-            ),
+            child: CustomPaint(painter: RouteMapPainter(stores: stores)),
           ),
           const SizedBox(height: 20),
-          SummaryStat(
-            label: '거리',
-            value: history.distanceKmLabel,
-            unit: 'km',
-          ),
+          SummaryStat(label: '거리', value: history.distanceKmLabel, unit: 'km'),
           const SizedBox(height: 16),
           SummaryStat(label: '방문', value: '${stores.length}'),
           const SizedBox(height: 16),
@@ -152,7 +168,10 @@ class _StoreTimelineTile extends StatelessWidget {
                 ),
                 if (!isLast)
                   Expanded(
-                    child: Container(width: 1.5, color: const Color(0xFFD9D9D9)),
+                    child: Container(
+                      width: 1.5,
+                      color: const Color(0xFFD9D9D9),
+                    ),
                   ),
               ],
             ),
@@ -166,13 +185,21 @@ class _StoreTimelineTile extends StatelessWidget {
                 children: [
                   Text(
                     store.name,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    store.address,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF6A6A6A)),
-                  ),
+                  if (store.address.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      store.address,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF6A6A6A),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -44,40 +44,41 @@ class _HistoryListState extends State<HistoryList> {
     });
   }
 
-  // TODO: 상세 API 연동 후 서버 데이터로 교체
-  static const List<StoreModel> _mockStores = [
-    StoreModel(
-      name: '성심당 본점',
-      address: '대전광역시 00구 000로 00번길 00 1층',
-      latitude: 36.3220,
-      longitude: 127.4180,
-    ),
-    StoreModel(
-      name: '리유즈',
-      address: '대전광역시 00구 000로 00번길 00 1층',
-      latitude: 36.3305,
-      longitude: 127.4262,
-    ),
-    StoreModel(
-      name: '몽심',
-      address: '대전광역시 00구 000로 00번길 00 1층',
-      latitude: 36.3252,
-      longitude: 127.4335,
-    ),
-    StoreModel(
-      name: '한빛탑',
-      address: '대전광역시 00구 000로 00번길 00',
-      latitude: 36.3330,
-      longitude: 127.4405,
-    ),
-  ];
+  /// 당겨서 새로고침. RefreshIndicator가 스피너를 유지하도록
+  /// 새 요청이 끝날 때까지 기다린다.
+  Future<void> _refresh() async {
+    final future = fetchHistories();
+    setState(() {
+      _historiesFuture = future;
+    });
+    await future;
+  }
+
+  /// 히스토리 API는 가게 좌표/주소까지는 내려주지 않아, 방문 순서를 보여주는
+  /// 루트맵을 그릴 수 있도록 이름만으로 순번별 좌표를 임의로 배치한다.
+  static List<StoreModel> _storesFromHistory(HistoryModel history) {
+    final names = history.storeNames
+        .split(',')
+        .map((name) => name.trim())
+        .where((name) => name.isNotEmpty)
+        .toList();
+    return [
+      for (var i = 0; i < names.length; i++)
+        StoreModel(
+          name: names[i],
+          address: '',
+          latitude: -i.toDouble(),
+          longitude: i.isEven ? 0 : 1,
+        ),
+    ];
+  }
 
   void _openDetail(BuildContext context, HistoryModel history) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => HistoryDetail(
           history: history,
-          stores: _mockStores,
+          stores: _storesFromHistory(history),
         ),
       ),
     );
@@ -128,21 +129,41 @@ class _HistoryListState extends State<HistoryList> {
                   }
 
                   if (items.isEmpty) {
-                    return const Center(child: Text('아직 완주 기록이 없어요'));
+                    // 빈 화면에서도 당겨서 새로고침이 되도록 스크롤 영역으로 감싼다.
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: constraints.maxHeight,
+                              child: const Center(
+                                child: Text('아직 완주 기록이 없어요'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   }
 
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    itemCount: items.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 14),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return HistoryCard(
-                        history: item,
-                        onTap: () => _openDetail(context, item),
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: _refresh,
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 25),
+                      itemCount: items.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 14),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return HistoryCard(
+                          history: item,
+                          onTap: () => _openDetail(context, item),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

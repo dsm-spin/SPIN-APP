@@ -45,7 +45,7 @@ app.*.map.json
 /android/app/release
 
 # 환경 변수 (서버 주소 등) - 커밋 금지
-# .env.example(템플릿)만 커밋하고 실제 값이 든 파일은 전부 제외
+# ..env.example(템플릿)만 커밋하고 실제 값이 든 파일은 전부 제외
 .env
 .env.*
 !.env.example

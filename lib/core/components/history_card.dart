@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spin_app/core/theme/colors.dart';
+import 'package:spin_app/core/components/history_thumbnail.dart';
 import 'package:spin_app/models/history_model.dart';
 
 class HistoryCard extends StatelessWidget {
@@ -21,30 +21,28 @@ class HistoryCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: AppColors.impact,
-                borderRadius: BorderRadius.circular(10),
-                image: history.photoUrl.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(history.photoUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-            ),
+            HistoryThumbnail(history: history),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 무엇을 하러 간 여행이었는지가 제목이다.
+                  Text(
+                    history.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       const Icon(
                         Icons.location_on,
-                        size: 15,
+                        size: 14,
                         color: Color(0xFFE0708A),
                       ),
                       const SizedBox(width: 4),
@@ -54,8 +52,8 @@ class HistoryCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                            color: Color(0xFF6A6A6A),
                           ),
                         ),
                       ),
@@ -70,24 +68,19 @@ class HistoryCard extends StatelessWidget {
                         color: Color(0xFF6A6A6A),
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        history.completedAtLabel,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF6A6A6A),
+                      // 글꼴을 키운 기기에서 날짜가 카드 밖으로 밀리지 않도록.
+                      Expanded(
+                        child: Text(
+                          history.completedAtLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6A6A6A),
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    history.purpose,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF9A9A9A),
-                    ),
                   ),
                 ],
               ),

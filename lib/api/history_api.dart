@@ -1,46 +1,27 @@
 import 'package:dio/dio.dart';
-import 'package:spin_app/core/config/env.dart';
+import 'package:spin_app/api/api_client.dart';
 import 'package:spin_app/models/history_model.dart';
 
-final _dio = Dio(BaseOptions(baseUrl: Env.baseUrl));
-
-/// 완주 기록 목록을 서버에서 GET으로 가져온다.
+/// 완주 히스토리 목록을 서버에서 가져온다. (GET /challenges/history)
 ///
+/// 로그인(세션) 상태여야 한다 — 세션 쿠키는 api_client가 자동으로 실어 보낸다.
 /// 성공 시 [HistoryModel] 리스트를, 실패 시 null을 반환한다.
-/// 사용 예:
-/// ```dart
-/// final histories = await fetchHistories();
-/// ```
 Future<List<HistoryModel>?> fetchHistories() async {
   try {
-    final response = await _dio.get('/histories');
+    final response = await dio.get('/challenges/history');
 
-    if (response.statusCode == 200) {
-      final data = response.data;
-
-      // 서버 응답이 [ {...}, {...} ] 형태인 경우
-      if (data is List) {
-        return data
-            .map((e) => HistoryModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-      }
-
-      // 서버 응답이 { "histories": [ {...} ] } 형태로 감싸져 오는 경우
-      if (data is Map<String, dynamic> && data['histories'] is List) {
-        return (data['histories'] as List)
-            .map((e) => HistoryModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-      }
+    if (response.statusCode == 200 && response.data is List) {
+      return (response.data as List)
+          .map((e) => HistoryModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     return null;
   } on DioException catch (e) {
-    print('Dio 에러 발생: ${e.message}');
-    if (e.response != null) {
-      print('서버가 뱉은 에러 데이터: ${e.response?.data}');
-    }
+    // 403: 로그인(세션)이 없거나 만료된 상태
+    print('히스토리 조회 실패 (status: ${e.response?.statusCode}): ${e.message}');
     return null;
   } catch (e) {
-    print('일반 에러 발생: $e');
+    print('히스토리 조회 일반 에러: $e');
     return null;
   }
 }

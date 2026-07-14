@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:spin_app/pages/auth/InputWidget_component.dart';
+import 'package:spin_app/core/components/InputWidget_component.dart';
 
 class InputWidget extends StatefulWidget {
   final TextEditingController idController;
@@ -17,14 +17,17 @@ class InputWidget extends StatefulWidget {
 }
 
 class _InputWidgetState extends State<InputWidget> {
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         InputComponent(controller: widget.idController, hintText: '아이디'),
         const SizedBox(height: 10),
-        InputComponent(controller: widget.passwordController, hintText: '비밀번호'),
+        InputComponent(
+          controller: widget.passwordController,
+          hintText: '비밀번호',
+          secureText: true,
+        ),
       ],
     );
   }

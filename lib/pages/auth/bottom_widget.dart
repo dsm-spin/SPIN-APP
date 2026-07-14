@@ -16,23 +16,18 @@ class _BottomWidgetState extends State<BottomWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-                '로그인을 아직 안하셨나요?',
-              style: TextStyle(
-                color: Colors.black,
-              ),
-            ),
+            Text('로그인을 아직 안하셨나요?', style: TextStyle(color: Colors.black)),
             const SizedBox(width: 20),
             TextButton(
-                onPressed: () {},
-                child: Text(
-                    '로그인',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                  ),
+              onPressed: () {},
+              child: Text(
+                '로그인',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
                 ),
+              ),
             ),
           ],
         ),
