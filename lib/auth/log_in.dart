@@ -3,6 +3,7 @@ import 'package:spin_app/auth/InputWidget.dart';
 import 'package:spin_app/components/bottom_button.dart';
 import 'package:spin_app/log_in_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/svg.dart';
 class LogInWidget extends StatefulWidget {
   const LogInWidget({super.key});
 
@@ -22,13 +23,10 @@ class _LogInWidgetState extends State<LogInWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'spin',
-              style: TextStyle(
-                color: Color(0xFF3D532B),
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
+            SvgPicture.asset(
+              'lib/assets/images/logo.svg',
+              width: 20,
+              height: 20,
             ),
             const SizedBox(height: 100),
             Text(
