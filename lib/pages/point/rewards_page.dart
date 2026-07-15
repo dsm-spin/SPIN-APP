@@ -65,23 +65,7 @@ class _RewardsPageState extends State<RewardsPage> {
   }
 
   Future<bool?> _confirmRedeem(RewardModel reward) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("'${reward.title}'로 교환할까요?"),
-        content: Text('${formatPoints(reward.cost)}P가 차감돼요'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('교환'),
-          ),
-        ],
-      ),
-    );
+    return showRedeemConfirmDialog(context, reward: reward, balance: _balance);
   }
 
   @override
@@ -242,6 +226,216 @@ class _RewardCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// "포인트로 혜택 받기"에서 혜택을 고르면 뜨는 교환 확인 모달.
+/// 현재 잔액 → 차감 → 교환 후 잔액을 한눈에 보여준다.
+Future<bool?> showRedeemConfirmDialog(
+  BuildContext context, {
+  required RewardModel reward,
+  required int balance,
+}) {
+  return showGeneralDialog<bool>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: '포인트 교환 확인',
+    barrierColor: Colors.black.withValues(alpha: 0.55),
+    transitionDuration: const Duration(milliseconds: 200),
+    pageBuilder: (context, _, _) =>
+        Center(child: _RedeemConfirmDialog(reward: reward, balance: balance)),
+    transitionBuilder: (context, animation, _, child) {
+      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.94, end: 1.0).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
+class _RedeemConfirmDialog extends StatelessWidget {
+  final RewardModel reward;
+  final int balance;
+
+  const _RedeemConfirmDialog({required this.reward, required this.balance});
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = balance - reward.cost;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: 300,
+        padding: const EdgeInsets.fromLTRB(24, 26, 24, 22),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(26),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.28),
+              blurRadius: 30,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: AppColors.greenWhite,
+                shape: BoxShape.circle,
+              ),
+              child: Text(reward.emoji, style: const TextStyle(fontSize: 30)),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "'${reward.title}'로\n교환할까요?",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                height: 1.35,
+                color: AppColors.greenKelp,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              reward.description,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.5,
+                color: AppColors.greenKelp.withValues(alpha: 0.55),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.springWood,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.button.withValues(alpha: 0.12)),
+              ),
+              child: Row(
+                children: [
+                  _PointColumn(label: '현재', value: balance),
+                  Icon(
+                    Icons.remove_rounded,
+                    size: 16,
+                    color: AppColors.greenKelp.withValues(alpha: 0.35),
+                  ),
+                  _PointColumn(label: '교환', value: reward.cost, accent: true),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: AppColors.greenKelp.withValues(alpha: 0.35),
+                  ),
+                  _PointColumn(label: '남음', value: remaining),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.greenWhite,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '취소',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.greenKelp.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.button,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        '교환',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.background,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 포인트 내역 박스 안에서 "현재 / 교환 / 남음" 한 칸을 그린다.
+class _PointColumn extends StatelessWidget {
+  final String label;
+  final int value;
+  final bool accent;
+
+  const _PointColumn({
+    required this.label,
+    required this.value,
+    this.accent = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.greenKelp.withValues(alpha: 0.45),
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            '${accent ? '-' : ''}${formatPoints(value)}P',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: accent ? const Color(0xFFC2607A) : AppColors.greenKelp,
+            ),
+          ),
+        ],
       ),
     );
   }

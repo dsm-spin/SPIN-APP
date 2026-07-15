@@ -25,14 +25,21 @@ class HistoryModel {
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) {
     return HistoryModel(
-      challengeId: json['challengeId'] as int,
+      // 서버 OpenAPI 스펙(RouteHistoryResponse)엔 required 필드가 하나도
+      // 없어서, 모든 필드가 null로 내려올 수 있다는 전제로 안전하게 캐스팅한다.
+      challengeId: (json['challengeId'] as num?)?.toInt() ?? 0,
       routeId: (json['routeId'] as num?)?.toInt(),
-      region: json['region'] as String,
-      purpose: json['purpose'] as String,
-      totalDistanceMeters: json['totalDistanceMeters'] as int,
-      estimatedDurationMinutes: json['estimatedDurationMinutes'] as int,
-      startedAt: DateTime.parse(json['startedAt'] as String),
-      completedAt: DateTime.parse(json['completedAt'] as String),
+      region: (json['region'] as String?) ?? '',
+      purpose: (json['purpose'] as String?) ?? '',
+      totalDistanceMeters: (json['totalDistanceMeters'] as num?)?.toInt() ?? 0,
+      estimatedDurationMinutes:
+          (json['estimatedDurationMinutes'] as num?)?.toInt() ?? 0,
+      startedAt:
+          DateTime.tryParse((json['startedAt'] as String?) ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      completedAt:
+          DateTime.tryParse((json['completedAt'] as String?) ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       // 미첨부 시 서버가 null을 내려준다
       photoUrl: (json['photoUrl'] as String?) ?? '',
       // 서버는 방문 순서대로의 가게 이름 "배열"을 내려준다

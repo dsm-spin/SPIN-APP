@@ -77,7 +77,12 @@ class _StoryCardBody extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(19),
       child: photo != null
-          ? _PhotoBackgroundBody(history: history, stores: stores, photo: photo)
+          ? _PhotoBackgroundBody(
+              history: history,
+              stores: stores,
+              hasRealLocation: hasRealLocation,
+              photo: photo,
+            )
           : _MapBackgroundBody(
               history: history,
               stores: stores,
@@ -133,16 +138,6 @@ class _MapBackgroundBody extends StatelessWidget {
               SizedBox(height: 14 * scale),
               SummaryStat(label: '소요 시간', value: history.durationLabel),
               const Spacer(),
-              Center(
-                child: Text(
-                  '같은 루트로 시작하기',
-                  style: TextStyle(
-                    fontSize: 16 * scale,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
               SizedBox(height: 40 * scale),
             ],
           );
@@ -152,16 +147,20 @@ class _MapBackgroundBody extends StatelessWidget {
   }
 }
 
-/// 사진 모드: 사용자가 고른 사진을 카드 전체 배경으로 깔고, 아래쪽에 어둡게
-/// 그러데이션을 덮어 그 위에 스탯을 얹는다.
+/// 사진 모드: 사용자가 고른 사진을 카드 전체 배경으로 깔고, 위쪽엔 지도를
+/// 스티커처럼 얹고, 아래쪽엔 어둡게 그러데이션을 덮어 그 위에 스탯을 얹는다.
+/// (지도가 사라지면 "이 루트가 어디였는지"가 안 보여서, 사진을 골라도 지도는
+/// 계속 보이게 둔다.)
 class _PhotoBackgroundBody extends StatelessWidget {
   final HistoryModel history;
   final List<StoreModel> stores;
+  final bool hasRealLocation;
   final File photo;
 
   const _PhotoBackgroundBody({
     required this.history,
     required this.stores,
+    required this.hasRealLocation,
     required this.photo,
   });
 
@@ -188,8 +187,13 @@ class _PhotoBackgroundBody extends StatelessWidget {
               final scale = constraints.maxWidth / 354;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  _MapSticker(
+                    height: constraints.maxHeight * 0.24,
+                    hasRealLocation: hasRealLocation,
+                    stores: stores,
+                  ),
+                  const Spacer(),
                   SummaryStat(
                     label: '거리',
                     value: history.distanceKmLabel,
@@ -217,6 +221,45 @@ class _PhotoBackgroundBody extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// 사진 배경 위에 폴라로이드 스티커처럼 얹는 작은 지도.
+class _MapSticker extends StatelessWidget {
+  final double height;
+  final bool hasRealLocation;
+  final List<StoreModel> stores;
+
+  const _MapSticker({
+    required this.height,
+    required this.hasRealLocation,
+    required this.stores,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      width: double.infinity,
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: hasRealLocation && stores.isNotEmpty
+            ? RouteMapImage(stores: stores)
+            : CustomPaint(painter: RouteMapPainter(stores: stores)),
+      ),
     );
   }
 }

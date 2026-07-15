@@ -4,7 +4,7 @@ import 'package:spin_app/core/components/app_snackbar.dart';
 import 'package:spin_app/core/components/bottom_button.dart';
 import 'package:spin_app/core/components/select_button.dart';
 import 'package:spin_app/core/theme/colors.dart';
-import 'package:spin_app/pages/route/route_detail_page.dart';
+import 'package:spin_app/pages/route/route_options_page.dart';
 
 const _districts = ['유성구', '대덕구', '서구', '중구', '동구'];
 
@@ -49,24 +49,26 @@ class _HomeState extends State<Home> {
     }
 
     setState(() => _isLoading = true);
-    final result = await generateRoute(
-      region: _selectedDistrict!,
-      purpose: _purposeController.text.trim(),
-    );
+    final region = _selectedDistrict!;
+    final purpose = _purposeController.text.trim();
+
+    // 서버가 한 번의 호출로 서로 다른 루트 대안을 여러 개(현재 3개) 배열로
+    // 내려준다 — 그중 하나를 고르라는 뜻이라 여러 번 부를 필요가 없다.
+    final options = await generateRoute(region: region, purpose: purpose);
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (result == null) {
+    if (options == null || options.isEmpty) {
       AppSnackBar.error(context, '루트 생성에 실패했어요. 잠시 후 다시 시도해주세요.');
       return;
     }
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => RouteDetailPage(
-          result: result,
-          region: _selectedDistrict!,
-          purpose: _purposeController.text.trim(),
+        builder: (_) => RouteOptionsPage(
+          options: options,
+          region: region,
+          purpose: purpose,
         ),
       ),
     );
@@ -175,9 +177,6 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           const SizedBox(height: 14),
-                          _ClearButton(
-                            onTap: _hasInput ? _clearInput : null,
-                          ),
                         ],
                       ),
                       Column(
@@ -200,52 +199,6 @@ class _HomeState extends State<Home> {
                 ),
               );
             },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 적어둔 내용을 지우는 작은 버튼.
-/// [onTap]이 null이면(=적은 게 없으면) 흐리게 비활성 상태로 보인다.
-class _ClearButton extends StatelessWidget {
-  final VoidCallback? onTap;
-
-  const _ClearButton({this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onTap != null;
-    final color = enabled
-        ? AppColors.button
-        : AppColors.greenKelp.withValues(alpha: 0.3);
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-          decoration: BoxDecoration(
-            color: enabled ? AppColors.greenWhite : Colors.transparent,
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: color.withValues(alpha: 0.35)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.delete_outline_rounded, size: 15, color: color),
-              const SizedBox(width: 6),
-              Text(
-                '삭제',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
-              ),
-            ],
           ),
         ),
       ),

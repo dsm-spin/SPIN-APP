@@ -63,6 +63,14 @@ class CheckInResult {
   ///
   final int totalPoints;
 
+  /// 이 챌린지를 시작한 시각. completedAt과 같은 응답에서 함께 내려오므로,
+  /// 서버 시계가 어느 시간대로 돌든 둘 사이 시간대는 항상 같다
+  /// (소요 시간을 구할 땐 이 값과 [completedAt]을 같이 써야 안전하다).
+  final String? startedAt;
+
+  /// 완주 시각. 완주 전(진행 중) 체크인 응답에서는 null.
+  final String? completedAt;
+
   const CheckInResult({
     required this.challengeId,
     required this.routeId,
@@ -71,6 +79,8 @@ class CheckInResult {
     required this.checkedInCount,
     required this.pointsEarned,
     required this.totalPoints,
+    this.startedAt,
+    this.completedAt,
   });
 
   factory CheckInResult.fromJson(Map<String, dynamic> json) {
@@ -82,6 +92,8 @@ class CheckInResult {
       checkedInCount: (json['checkedInCount'] as num?)?.toInt() ?? 0,
       pointsEarned: (json['pointsEarned'] as num?)?.toInt() ?? 0,
       totalPoints: (json['totalPoints'] as num?)?.toInt() ?? 0,
+      startedAt: json['startedAt'] as String?,
+      completedAt: json['completedAt'] as String?,
     );
   }
 

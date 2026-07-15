@@ -42,6 +42,12 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
   Set<Marker> _markers = {};
   bool _isCheckingIn = false;
 
+  /// 이 화면이 뜬 시점(=챌린지 시작 직후)의 기기 로컬 시각.
+  /// 완주 시 소요 시간은 원래 마지막 체크인 응답의 startedAt/completedAt을
+  /// 그대로 쓴다(둘 다 서버 값이라 시간대가 항상 맞다). 이 값은 그 응답에
+  /// 값이 비어 있는 등 예외적인 경우에만 대신 쓰는 대비책이다.
+  final DateTime _localStartedAt = DateTime.now();
+
   int get _totalStops => _progress?.totalStops ?? _challenge.totalStops;
 
   int get _checkedInCount =>
@@ -127,7 +133,7 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
     // 루트를 완주하면 축하 + 인스타 공유를 제안하고 이 화면(진행 중인 루트)은 닫는다.
     // 완주한 기록은 히스토리 탭에서만 보여준다.
     if (justCompleted) {
-      await _celebrateAndOfferShare();
+      await _celebrateAndOfferShare(data);
       if (!mounted) return;
       Navigator.of(context).pop();
       return;
@@ -136,8 +142,10 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
   }
 
   /// 완주 축하 다이얼로그를 띄우고, 원하면 인스타 스토리 공유 화면으로 이어간다.
-  Future<void> _celebrateAndOfferShare() async {
-    final history = _historyForShare();
+  /// [finalCheckIn]은 루트를 완주시킨 마지막 체크인 응답 — startedAt/completedAt이
+  /// 이 안에 함께 담겨 있어, 소요 시간을 구할 때 그대로 쓴다.
+  Future<void> _celebrateAndOfferShare(CheckInResult finalCheckIn) async {
+    final history = _historyForShare(finalCheckIn);
     final stores = _storesForShare();
     final hasRealLocation = widget.result.stops.every(
       (stop) => stop.latitude != null && stop.longitude != null,
@@ -183,11 +191,17 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
         .fold<int>(0, (sum, e) => sum + e.points);
   }
 
-  HistoryModel _historyForShare() {
+  HistoryModel _historyForShare(CheckInResult finalCheckIn) {
+    // startedAt·completedAt은 반드시 같은 응답(마지막 체크인)에서 나온 값끼리
+    // 짝지어 써야 한다 — 서버 시계가 어느 시간대로 돌든 같은 응답 안의 두
+    // 값은 같은 시간대라 소요 시간 계산이 항상 맞는다. 어느 한쪽이라도
+    // 파싱에 실패하면(필드 누락 등) 기기 로컬 시각으로 통째로 대신한다 —
+    // 서버 값과 기기 값을 섞으면 시간대가 어긋나 소요 시간이 크게 틀어진다.
+    final serverStartedAt = DateTime.tryParse(finalCheckIn.startedAt ?? '');
+    final serverCompletedAt = DateTime.tryParse(finalCheckIn.completedAt ?? '');
     final now = DateTime.now();
-    final startedAt =
-        DateTime.tryParse(_challenge.startedAt) ??
-        now.subtract(Duration(minutes: widget.result.estimatedDurationMinutes));
+    final bothFromServer =
+        serverStartedAt != null && serverCompletedAt != null;
 
     return HistoryModel(
       challengeId: _challenge.challengeId,
@@ -196,8 +210,8 @@ class _RouteProgressPageState extends State<RouteProgressPage> {
       purpose: '',
       totalDistanceMeters: widget.result.totalDistanceMeters,
       estimatedDurationMinutes: widget.result.estimatedDurationMinutes,
-      startedAt: startedAt,
-      completedAt: now,
+      startedAt: bothFromServer ? serverStartedAt : _localStartedAt,
+      completedAt: bothFromServer ? serverCompletedAt : now,
       photoUrl: '',
       storeNames: [
         for (final stop in widget.result.stops) stop.storeName,
@@ -510,14 +524,6 @@ class _NextDestinationCard extends StatelessWidget {
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: AppColors.greenKelp,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '도보 ${stop.walkMinutes}분',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.greenKelp.withValues(alpha: 0.55),
                       ),
                     ),
                   ],

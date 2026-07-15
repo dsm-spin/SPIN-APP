@@ -4,8 +4,10 @@ import 'package:spin_app/models/route_model.dart';
 
 /// 지역/목적 기반 루트를 생성한다. (POST /routes)
 ///
-/// 성공 시 [RouteGenerateResult]를, 실패 시 null을 반환한다.
-Future<RouteGenerateResult?> generateRoute({
+/// 서버가 한 번의 호출로 Claude가 추천한 서로 다른 루트 대안을 여러 개
+/// (현재 3개) 배열로 내려준다 — 사용자가 그중 하나를 골라 시작하라는 뜻이다.
+/// 성공 시 [RouteGenerateResult] 목록을, 실패 시 null을 반환한다.
+Future<List<RouteGenerateResult>?> generateRoute({
   required String region,
   required String purpose,
   double? latitude,
@@ -22,10 +24,10 @@ Future<RouteGenerateResult?> generateRoute({
       },
     );
 
-    if (response.statusCode == 200) {
-      return RouteGenerateResult.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+    if (response.statusCode == 200 && response.data is List) {
+      return (response.data as List)
+          .map((e) => RouteGenerateResult.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     return null;
   } on DioException catch (e) {

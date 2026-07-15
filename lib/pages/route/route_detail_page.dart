@@ -243,11 +243,15 @@ class _StatsCard extends StatelessWidget {
   String get _distanceLabel =>
       (result.totalDistanceMeters / 1000).toStringAsFixed(1);
 
+  // 시간과 분이 둘 다 있으면(예: 140분) value/unit을 나누지 않고
+  // "2시간 20분"을 통째로 보여준다 — 나눠서 넣으면 분이 작은 단위 글자
+  // 안에 묻혀서 눈에 잘 안 띈다.
   String get _durationLabel {
     final hours = result.estimatedDurationMinutes ~/ 60;
     final minutes = result.estimatedDurationMinutes % 60;
     if (hours <= 0) return '$minutes';
-    return '$hours';
+    if (minutes <= 0) return '$hours';
+    return '$hours시간 $minutes';
   }
 
   String get _durationUnit {
@@ -255,8 +259,7 @@ class _StatsCard extends StatelessWidget {
     final minutes = result.estimatedDurationMinutes % 60;
     if (hours <= 0) return '분';
     if (minutes <= 0) return '시간';
-    return '시간 $minutes'
-        '분';
+    return '분';
   }
 
   @override
@@ -490,15 +493,6 @@ class _StopCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '도보 ${stop.walkMinutes}분',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: AppColors.button,
-            ),
           ),
           if (stop.reason.isNotEmpty) ...[
             const SizedBox(height: 8),

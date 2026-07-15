@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:spin_app/core/storage/point_store.dart';
 import 'package:spin_app/core/theme/colors.dart';
@@ -27,7 +28,9 @@ class _CouponsPageState extends State<CouponsPage> {
 
   Future<void> _refresh() async {
     final future = _loadLedger();
-    setState(() => _future = future);
+    setState(() {
+      _future = future;
+    });
     await future;
   }
 
@@ -587,7 +590,16 @@ Future<void> showCouponUsedDialog(
     barrierLabel: '쿠폰 사용 완료',
     barrierColor: Colors.black.withValues(alpha: 0.55),
     transitionDuration: const Duration(milliseconds: 200),
-    pageBuilder: (context, _, _) => Center(child: _CouponUsedCard(coupon: coupon)),
+    pageBuilder: (context, _, _) => Stack(
+      children: [
+        // 화면 전체에 색종이가 떨어지는 축하 연출. 카드 뒤에 깔려 카드를
+        // 가리지 않으면서도 화면 전체가 축하 분위기로 느껴지게 한다.
+        const Positioned.fill(
+          child: IgnorePointer(child: _ConfettiOverlay()),
+        ),
+        Center(child: _CouponUsedCard(coupon: coupon)),
+      ],
+    ),
     transitionBuilder: (context, animation, _, child) {
       // 배경 어두워짐 + 살짝 커지며 등장. 안쪽 축하 연출은
       // _CouponUsedCard가 자체 컨트롤러로 단계별로 재생한다.
@@ -601,6 +613,145 @@ Future<void> showCouponUsedDialog(
       );
     },
   );
+}
+
+/// 화면 전체에 색종이가 떨어지는 축하 연출. 카드 안쪽의 작은 색종이 폭죽과
+/// 별개로, 다이얼로그가 뜨는 즉시 한 번 재생되고 끝난다(반복하지 않음).
+class _ConfettiOverlay extends StatefulWidget {
+  const _ConfettiOverlay();
+
+  @override
+  State<_ConfettiOverlay> createState() => _ConfettiOverlayState();
+}
+
+class _ConfettiOverlayState extends State<_ConfettiOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1900),
+  )..forward();
+
+  late final List<_FallingPiece> _pieces = _generatePieces();
+
+  static const _palette = [
+    AppColors.button,
+    AppColors.impact,
+    AppColors.warning,
+    Color(0xFFE8C468),
+  ];
+
+  static List<_FallingPiece> _generatePieces() {
+    final random = math.Random(7);
+    return List.generate(46, (i) {
+      return _FallingPiece(
+        x: random.nextDouble(),
+        delay: random.nextDouble() * 0.3,
+        size: 5 + random.nextDouble() * 5,
+        color: _palette[random.nextInt(_palette.length)],
+        swayAmplitude: 12 + random.nextDouble() * 20,
+        swaySpeed: 1.2 + random.nextDouble() * 2.2,
+        rotationSpeed: (random.nextBool() ? 1 : -1) * (1 + random.nextDouble() * 3),
+        isRect: random.nextBool(),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return CustomPaint(
+          size: Size.infinite,
+          painter: _FallingConfettiPainter(
+            progress: _controller.value,
+            pieces: _pieces,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _FallingPiece {
+  final double x;
+  final double delay;
+  final double size;
+  final Color color;
+  final double swayAmplitude;
+  final double swaySpeed;
+  final double rotationSpeed;
+  final bool isRect;
+
+  const _FallingPiece({
+    required this.x,
+    required this.delay,
+    required this.size,
+    required this.color,
+    required this.swayAmplitude,
+    required this.swaySpeed,
+    required this.rotationSpeed,
+    required this.isRect,
+  });
+}
+
+/// 위에서 좌우로 흔들리며 떨어지는 색종이를 그린다. [progress]는 0→1.
+class _FallingConfettiPainter extends CustomPainter {
+  final double progress;
+  final List<_FallingPiece> pieces;
+
+  _FallingConfettiPainter({required this.progress, required this.pieces});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final piece in pieces) {
+      // delay만큼 늦게 출발해서, 한꺼번에 쏟아지지 않고 층을 이루며 떨어진다.
+      final localT = ((progress - piece.delay) / (1 - piece.delay)).clamp(
+        0.0,
+        1.0,
+      );
+      if (localT <= 0) continue;
+
+      final fallY = -20 + localT * (size.height + 40);
+      final sway =
+          math.sin(localT * piece.swaySpeed * math.pi * 2) * piece.swayAmplitude;
+      final dx = piece.x * size.width + sway;
+
+      final fadeOut = localT > 0.85 ? (1 - (localT - 0.85) / 0.15) : 1.0;
+      final fadeIn = (localT / 0.08).clamp(0.0, 1.0);
+      final opacity = (fadeOut * fadeIn).clamp(0.0, 1.0);
+      if (opacity <= 0) continue;
+
+      final paint = Paint()..color = piece.color.withValues(alpha: opacity);
+
+      canvas.save();
+      canvas.translate(dx, fallY);
+      canvas.rotate(localT * piece.rotationSpeed * math.pi * 2);
+      if (piece.isRect) {
+        canvas.drawRect(
+          Rect.fromCenter(
+            center: Offset.zero,
+            width: piece.size,
+            height: piece.size * 0.5,
+          ),
+          paint,
+        );
+      } else {
+        canvas.drawCircle(Offset.zero, piece.size / 2, paint);
+      }
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _FallingConfettiPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 /// 체크 아이콘이 통통 튀며 나타나고 색종이가 흩날린 뒤, 문구·코드·버튼이
@@ -650,6 +801,13 @@ class _CouponUsedCardState extends State<_CouponUsedCard>
     parent: _controller,
     curve: const Interval(0.82, 1.0, curve: Curves.easeOut),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    // 체크 아이콘이 튀어나오는 타이밍에 맞춰 살짝 진동으로 손맛을 더한다.
+    HapticFeedback.mediumImpact();
+  }
 
   @override
   void dispose() {

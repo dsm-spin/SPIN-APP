@@ -4,6 +4,7 @@ import 'package:spin_app/core/theme/colors.dart';
 import 'package:spin_app/models/point_model.dart';
 import 'package:spin_app/pages/point/coupons_page.dart';
 import 'package:spin_app/pages/point/rewards_page.dart';
+import 'package:spin_app/pages/settings/settings_page.dart';
 
 /// '포인트' 탭: 현재 잔액과 체크인으로 쌓인 적립 내역을 보여준다.
 /// 내역은 기기에 저장된 원장([PointStore])에서 읽어온다.
@@ -49,6 +50,15 @@ class _PointPageState extends State<PointPage> {
     await _refresh();
   }
 
+  Future<void> _openSettings() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
+    // 포인트를 직접 수정했을 수 있으니 다시 불러온다.
+    if (!mounted) return;
+    await _refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,13 +82,36 @@ class _PointPageState extends State<PointPage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(25, 30, 25, 24),
                 children: [
-                  const Text(
-                    '내 포인트',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      height: 1.3,
-                    ),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          '내 포인트',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _openSettings,
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: AppColors.greenWhite,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.settings_outlined,
+                            size: 20,
+                            color: AppColors.greenKelp,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   _BalanceCard(ledger: ledger),

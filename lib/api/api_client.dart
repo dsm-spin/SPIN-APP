@@ -15,9 +15,13 @@ import 'package:spin_app/core/config/env.dart';
 /// (테스트에서는 가짜 응답을 주는 Dio로 교체할 수 있도록 final이 아니다.)
 late Dio dio;
 
+/// 로그인 세션 쿠키가 저장되는 곳. 로그아웃 시 이 쿠키를 지워서
+/// 서버에 별도 로그아웃 API가 없어도 기기에서 세션을 끊을 수 있게 한다.
+late PersistCookieJar cookieJar;
+
 Future<void> initApiClient() async {
   final dir = await getApplicationDocumentsDirectory();
-  final cookieJar = PersistCookieJar(
+  cookieJar = PersistCookieJar(
     storage: FileStorage('${dir.path}/.cookies/'),
   );
 

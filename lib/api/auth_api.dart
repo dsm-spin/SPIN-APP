@@ -37,6 +37,12 @@ Future<bool> hasValidSession() async {
   }
 }
 
+/// 로그아웃. 서버에 별도 로그아웃 API가 없어서, 기기에 저장된 세션 쿠키를
+/// 직접 지워서 로그인 상태를 끊는다. 이후 [hasValidSession]은 항상 false를 준다.
+Future<void> logOutApi() async {
+  await cookieJar.deleteAll();
+}
+
 /// 로그인. 성공하면 true를 반환한다.
 ///
 /// 성공 시 서버가 내려주는 세션 쿠키는 api_client의 CookieManager가
